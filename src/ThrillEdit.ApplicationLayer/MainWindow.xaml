@@ -4,9 +4,49 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ThrillEdit.ApplicationLayer"
+        xmlns:Models="clr-namespace:ThrillEdit.BusinessLayer.Models;assembly=ThrillEdit.BusinessLayer"
+        xmlns:views="clr-namespace:ThrillEdit.ApplicationLayer.Views"
+        xmlns:viewmodels="clr-namespace:ThrillEdit.ApplicationLayer.ViewModels"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
+    <Window.Resources>
 
+        <HierarchicalDataTemplate DataType="{x:Type Models:DirectoryItem}"
+                                  ItemsSource="{Binding Items}">
+            <TextBlock Text="{Binding Path=Name}" ToolTip="{Binding Path=Path}" />
+        </HierarchicalDataTemplate>
+
+        <DataTemplate DataType="{x:Type Models:FileItem}">
+            <Button Tag="{Binding Path=Path}">
+                <Button.Style>
+                    <Style TargetType="{x:Type Button}">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <ContentPresenter />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <EventSetter Event="MouseDoubleClick" Handler="OnItemMouseDoubleClick" />
+                    </Style>
+                </Button.Style>
+                <TextBlock Text="{Binding Path=Name}" ToolTip="{Binding Path=Path}"/>
+            </Button>
+        </DataTemplate>
+    </Window.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200px"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <TreeView x:Name="tvGameRoot" ItemsSource="{Binding FileTreeItems}">
+        </TreeView>
+        <ContentControl Content="{Binding CurrentViewModel}" Grid.Column="1">
+            <ContentControl.Resources>
+                <DataTemplate DataType="{x:Type viewmodels:MusicReplacerViewModel}">
+                    <views:MusicReplacerView/>
+                </DataTemplate>
+            </ContentControl.Resources>
+        </ContentControl>
     </Grid>
 </Window>

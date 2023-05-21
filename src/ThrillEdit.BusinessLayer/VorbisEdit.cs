@@ -149,5 +149,16 @@ namespace ThrillEdit.BusinessLayer
             }
             return byteData;
         }
+
+        public async Task<byte[]> GetVorbisBytesAsync(VorbisData vorbisData)
+        {
+            long size = vorbisData.Size;
+            byte[] byteData = new byte[size];
+            using (var fs = new FileStream(vorbisData.Origin, FileMode.Open))
+            {
+                fs.Read(byteData, Convert.ToInt32(vorbisData.StartPos), byteData.Length);
+            }
+            return byteData;
+        }
     }
 }
