@@ -14,7 +14,7 @@ using ThrillEdit.BusinessLayer.Models;
 
 namespace ThrillEdit.ApplicationLayer.Commands
 {
-    class PlayOggCommand : AsyncCommandBase
+    class PlayOggCommand : CommandBase
     {
         private readonly VorbisEdit _vorbisEdit;
         private readonly ZPlay _zPlay;
@@ -24,10 +24,10 @@ namespace ThrillEdit.ApplicationLayer.Commands
             _zPlay = zPlay;
         }
 
-        protected override async Task ExecuteAsync(object parameter)
+        public override void Execute(object parameter)
         {
             VorbisData vorbisData = (VorbisData)parameter;
-            byte[] songData = await _vorbisEdit.GetVorbisBytesAsync(vorbisData);
+            byte[] songData = _vorbisEdit.GetVorbisBytes(vorbisData);
             _zPlay.Close();
             _zPlay.OpenStream(true, true, ref songData, (uint)songData.Length, TStreamFormat.sfOgg);
             _zPlay.StartPlayback();

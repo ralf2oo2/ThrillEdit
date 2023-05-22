@@ -60,7 +60,7 @@ namespace ThrillEdit.ApplicationLayer
             InitializeComponent();
             DataContext = this;
 
-            _fileTreeItems = _itemProvider.GetItems(@"D:\\SteamLibrary\\steamapps\\common\\Thrillville Off the Rails", new string[] { "zap" });    
+            _fileTreeItems = _itemProvider.GetItems(@"D:\\SteamLibrary\\steamapps\\common\\Thrillville Off the Rails", new string[] { "zap"});    
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

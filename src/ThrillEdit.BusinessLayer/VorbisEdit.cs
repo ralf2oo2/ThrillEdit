@@ -25,14 +25,101 @@ namespace ThrillEdit.BusinessLayer
             {
                 while (lastOffset < fs.Length)
                 {
+                    int bytesRead = fs.Read(buffer, 0, buffer.Length);
+                    if(bytesRead == 0)
+                    {
+                        break;
+                    }
+                    for (int i = 0; i < bytesRead; i++)
+                    {
+                        fs.Seek(lastOffset + i, SeekOrigin.Begin);
+                        fs.Read(headerBytes, 0, headerBytes.Length);
+
+                        if (headerBytes[0] == 0x4F &&  // 'O'
+                            headerBytes[1] == 0x67 &&  // 'g'
+                            headerBytes[2] == 0x67 &&  // 'g'
+                            headerBytes[3] == 0x53)    // 'S'
+                        {
+                            if (headerBytes[5] == 0x2)
+                            {
+                                oggBegin = lastOffset + i;
+                                foundBegin = true;
+                            }
+                            if (foundBegin && (headerBytes[5] == 0x4 || headerBytes[5] == 0x5))
+                            {
+                                foundEnd = true;
+                                oggEnd = lastOffset + i + 27;
+
+                                uint trailingSize = headerBytes[26];
+                                byte[] trailingFrames = new byte[trailingSize];
+
+                                long position = fs.Position;
+                                long readResult = -1;
+                                long seekResult = -1;
+                                seekResult = fs.Seek(oggEnd, SeekOrigin.Begin);
+                                readResult = fs.Read(trailingFrames, 0, (int)trailingSize);
+                                if (seekResult != -1) // Finish error check
+                                {
+                                    //throw new Exception();
+                                }
+
+                                fs.Seek(oggEnd, SeekOrigin.Current);
+
+                                oggEnd += trailingSize;
+
+                                for (long j = 0; j < trailingSize; j++)
+                                {
+                                    oggEnd += trailingFrames[j];
+                                }
+                            }
+                            if (foundBegin && foundEnd)
+                            {
+                                foundBegin = false;
+                                foundEnd = false;
+
+                                VorbisData vorbis = new VorbisData();
+                                vorbis.Origin = fileName;
+                                vorbis.StartPos = oggBegin;
+                                vorbis.EndPos = oggEnd - 1;
+                                vorbisData.Add(vorbis);
+                                Debug.WriteLine("Origin: " + fileName);
+                                Debug.WriteLine("Begin: " + oggBegin);
+                                Debug.WriteLine("End: " + oggEnd);
+                            }
+                        }
+
+                    }
+                    lastOffset += bytesRead;
+                }
+            }
+            return vorbisData;
+        }
+
+        public List<VorbisData> ExtractVorbisDataOld(string fileName, int bufferSize)
+        {
+            List<VorbisData> vorbisData = new List<VorbisData>();
+            long oggBegin = 0;
+            long oggEnd = 0;
+            bool foundBegin = false;
+            bool foundEnd = false;
+
+            byte[] buffer = new byte[bufferSize];
+            byte[] headerBytes = new byte[27];
+            long lastOffset = 0;
+            using (var fs = new FileStream(fileName, FileMode.Open))
+            {
+                while (lastOffset < fs.Length)
+                {
                     fs.Seek(lastOffset, SeekOrigin.Begin);
                     fs.Read(buffer, 0, buffer.Length);
                     for (int i = 0; i < buffer.Length; i++)
                     {
                         fs.Seek(lastOffset + i, SeekOrigin.Begin);
                         fs.Read(headerBytes, 0, headerBytes.Length);
-                        var head = System.Text.Encoding.Default.GetString(new byte[4] { headerBytes[0], headerBytes[1], headerBytes[2], headerBytes[3] });
-                        if (head.ToString() == "OggS")
+                        if (headerBytes[0] == 0x4F &&  // 'O'
+                            headerBytes[1] == 0x67 &&  // 'g'
+                            headerBytes[2] == 0x67 &&  // 'g'
+                            headerBytes[3] == 0x53)    // 'S'
                         {
                             if (headerBytes[5] == 0x2)
                             {
@@ -91,7 +178,7 @@ namespace ThrillEdit.BusinessLayer
 
         public void ReplaceVorbisData(List<DataReplacement> dataReplacements, string fileName, string newFile)
         {
-            dataReplacements.OrderBy(x => x.OriginalData.StartPos);
+            dataReplacements = dataReplacements.OrderBy(x => x.OriginalData.StartPos).ToList();
 
             using (var originFs = new FileStream(fileName, FileMode.Open))
             {
@@ -135,8 +222,6 @@ namespace ThrillEdit.BusinessLayer
                     }
                 }
             }
-            FileInfo f = new FileInfo(newFile);
-            Debug.WriteLine(f.FullName);
         }
 
         public byte[] GetVorbisBytes(VorbisData vorbisData)
@@ -145,7 +230,8 @@ namespace ThrillEdit.BusinessLayer
             byte[] byteData = new byte[size];
             using (var fs = new FileStream(vorbisData.Origin, FileMode.Open))
             {
-                fs.Read(byteData, Convert.ToInt32(vorbisData.StartPos), byteData.Length);
+                fs.Seek(Convert.ToInt32(vorbisData.StartPos), SeekOrigin.Begin);
+                fs.Read(byteData, 0, byteData.Length);
             }
             return byteData;
         }
