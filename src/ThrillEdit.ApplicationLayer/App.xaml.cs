@@ -10,7 +10,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using ThrillEdit.BusinessLayer;
-using libZPlay;
 using ThrillEdit.BusinessLayer.Providers;
 
 namespace ThrillEdit.ApplicationLayer
@@ -28,15 +27,21 @@ namespace ThrillEdit.ApplicationLayer
                 .ConfigureServices((context, service) => {
                     service.AddSingleton<VorbisEdit>();
                     service.AddSingleton<ItemProvider>();
-                    service.AddSingleton<ZPlay>();
+                    service.AddSingleton
+                    (
+                         (services) => new AudioPlayer
+                             (
+                                 services.GetRequiredService<VorbisEdit>()
+                             )
+                    );
 
-                    service.AddSingleton<MainWindow>
+                    service.AddSingleton
                     (
                          (services) => new MainWindow
                              (
                                  services.GetRequiredService<VorbisEdit>(),
-                                 services.GetRequiredService<ItemProvider>(),
-                                 services.GetRequiredService<ZPlay>()
+                                 services.GetRequiredService<AudioPlayer>(),
+                                 services.GetRequiredService<ItemProvider>()
                              )
                     );
                 })

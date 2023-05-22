@@ -14,7 +14,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ThrillEdit.BusinessLayer;
-using libZPlay;
 using ThrillEdit.BusinessLayer.Models;
 using System.IO;
 using static System.Net.Mime.MediaTypeNames;
@@ -31,8 +30,8 @@ namespace ThrillEdit.ApplicationLayer
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
         private readonly VorbisEdit _vorbisEdit;
-        private readonly ZPlay _zPlay;
         private readonly ItemProvider _itemProvider;
+        private readonly AudioPlayer _audioPlayer;
 
         private ViewModelBase _currentViewModel;
 
@@ -52,10 +51,10 @@ namespace ThrillEdit.ApplicationLayer
         }
 
 
-        public MainWindow(VorbisEdit vorbisEdit, ItemProvider itemProvider, ZPlay zPlay) 
+        public MainWindow(VorbisEdit vorbisEdit, AudioPlayer audioPlayer, ItemProvider itemProvider) 
         {
             _vorbisEdit = vorbisEdit;
-            _zPlay = zPlay;
+            _audioPlayer = audioPlayer;
             _itemProvider = itemProvider;
             InitializeComponent();
             DataContext = this;
@@ -76,7 +75,7 @@ namespace ThrillEdit.ApplicationLayer
             Button button = (Button)sender;
             Debug.WriteLine(button.Tag);
 
-            CurrentViewModel = new MusicReplacerViewModel(_vorbisEdit, _zPlay, button.Tag.ToString());
+            CurrentViewModel = new MusicReplacerViewModel(_vorbisEdit, _audioPlayer, button.Tag.ToString());
         }
     }
 }

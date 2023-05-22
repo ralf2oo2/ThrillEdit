@@ -30,10 +30,25 @@ namespace ThrillEdit.BusinessLayer.Models
             set { _origin = value; }
         }
 
+        private TimeSpan _duration = new TimeSpan();
+
+        public TimeSpan Duration
+        {
+            get { return _duration; }
+            set { _duration = value; }
+        }
+
+        private int _rate;
+
+        public int Rate
+        {
+            get { return _rate; }
+            set { _rate = value; }
+        }
+
         public long Size
         {
             get { return (_endPos - _startPos) + 1; }
         }
-
     }
 }

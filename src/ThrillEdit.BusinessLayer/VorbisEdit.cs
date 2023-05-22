@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NAudio.Vorbis;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -35,10 +36,10 @@ namespace ThrillEdit.BusinessLayer
                         fs.Seek(lastOffset + i, SeekOrigin.Begin);
                         fs.Read(headerBytes, 0, headerBytes.Length);
 
-                        if (headerBytes[0] == 0x4F &&  // 'O'
-                            headerBytes[1] == 0x67 &&  // 'g'
-                            headerBytes[2] == 0x67 &&  // 'g'
-                            headerBytes[3] == 0x53)    // 'S'
+                        if (headerBytes[0] == (byte)'O' &&  // 'O'
+                            headerBytes[1] == (byte)'g' &&  // 'g'
+                            headerBytes[2] == (byte)'g' &&  // 'g'
+                            headerBytes[3] == (byte)'S')    // 'S'
                         {
                             if (headerBytes[5] == 0x2)
                             {
@@ -81,6 +82,9 @@ namespace ThrillEdit.BusinessLayer
                                 vorbis.Origin = fileName;
                                 vorbis.StartPos = oggBegin;
                                 vorbis.EndPos = oggEnd - 1;
+
+                                
+
                                 vorbisData.Add(vorbis);
                                 Debug.WriteLine("Origin: " + fileName);
                                 Debug.WriteLine("Begin: " + oggBegin);
@@ -92,14 +96,29 @@ namespace ThrillEdit.BusinessLayer
                     lastOffset += bytesRead;
                 }
             }
+            foreach(VorbisData vorbis in vorbisData)
+            {
+                MemoryStream s = new MemoryStream(GetVorbisBytes(vorbis));
+
+                using (var vorbisReader = new NVorbis.VorbisReader(s, true))
+                {
+                    // get the channels & sample rate
+                    vorbis.Duration = vorbisReader.TotalTime;
+                    vorbis.Rate = vorbisReader.SampleRate;
+                    Debug.WriteLine("Rate: " + vorbis.Rate);
+                    Debug.WriteLine("Duration: " + vorbis.Duration.Minutes);
+                }
+            }
             return vorbisData;
         }
 
-        public List<VorbisData> ExtractVorbisDataOld(string fileName, int bufferSize)
+        /*public List<VorbisData> ExtractVorbisDataOld(string fileName, int bufferSize)
         {
             List<VorbisData> vorbisData = new List<VorbisData>();
             long oggBegin = 0;
             long oggEnd = 0;
+            int rate = -1;
+            int length = -1;
             bool foundBegin = false;
             bool foundEnd = false;
 
@@ -157,11 +176,20 @@ namespace ThrillEdit.BusinessLayer
                             {
                                 foundBegin = false;
                                 foundEnd = false;
-
                                 VorbisData vorbis = new VorbisData();
                                 vorbis.Origin = fileName;
                                 vorbis.StartPos = oggBegin;
                                 vorbis.EndPos = oggEnd - 1;
+
+                                MemoryStream s = new MemoryStream(GetVorbisBytes(vorbis));
+
+                                using (var vorbisReader = new NVorbis.VorbisReader(s, true))
+                                {
+                                    // get the channels & sample rate
+                                    vorbis.Duration = vorbisReader.TotalTime;
+                                    var sampleRate = vorbisReader.SampleRate;
+                                }
+
                                 vorbisData.Add(vorbis);
                                 Debug.WriteLine("Origin: " + fileName);
                                 Debug.WriteLine("Begin: " + oggBegin);
@@ -174,7 +202,7 @@ namespace ThrillEdit.BusinessLayer
                 }
             }
             return vorbisData;
-        }
+        }*/
 
         public void ReplaceVorbisData(List<DataReplacement> dataReplacements, string fileName, string newFile)
         {

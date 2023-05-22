@@ -1,5 +1,4 @@
-﻿using libZPlay;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -15,9 +14,11 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
     class MusicReplacerViewModel : ViewModelBase
     {
         private readonly VorbisEdit _vorbisEdit;
-        private readonly ZPlay _zPlay;
+        private readonly AudioPlayer _audioPlayer;
 
         private List<VorbisData> _vorbisData;
+
+        public AudioPlayer AudioPlayer => _audioPlayer;
 
         public List<VorbisData> VorbisData
         {
@@ -27,11 +28,11 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
 
         public ICommand PlayOggCommand { get; set; }
 
-        public MusicReplacerViewModel(VorbisEdit vorbisEdit, ZPlay zPlay, string filePath)
+        public MusicReplacerViewModel(VorbisEdit vorbisEdit, AudioPlayer audioPlayer, string filePath)
         {
             _vorbisEdit = vorbisEdit;
-            _zPlay = zPlay;
-            PlayOggCommand = new PlayOggCommand(_vorbisEdit, _zPlay);
+            _audioPlayer = audioPlayer;
+            PlayOggCommand = new PlayOggCommand(_vorbisEdit, _audioPlayer);
             VorbisData = _vorbisEdit.ExtractVorbisData(filePath, 5242880);
         }
     }

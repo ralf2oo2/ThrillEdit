@@ -1,6 +1,6 @@
-﻿using libZPlay;
-using MVVMEssentials.Commands;
+﻿using MVVMEssentials.Commands;
 using MVVMEssentials.Services;
+using NAudio.CoreAudioApi;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,23 +14,20 @@ using ThrillEdit.BusinessLayer.Models;
 
 namespace ThrillEdit.ApplicationLayer.Commands
 {
-    class PlayOggCommand : CommandBase
+    class PlayOggCommand : AsyncCommandBase
     {
         private readonly VorbisEdit _vorbisEdit;
-        private readonly ZPlay _zPlay;
-        public PlayOggCommand(VorbisEdit vorbisEdit, ZPlay zPlay)
+        private readonly AudioPlayer _audioPlayer;
+        public PlayOggCommand(VorbisEdit vorbisEdit, AudioPlayer audioPlayer)
         {
             _vorbisEdit = vorbisEdit;
-            _zPlay = zPlay;
+            _audioPlayer = audioPlayer;
         }
 
-        public override void Execute(object parameter)
+        protected async override Task ExecuteAsync(object parameter)
         {
             VorbisData vorbisData = (VorbisData)parameter;
-            byte[] songData = _vorbisEdit.GetVorbisBytes(vorbisData);
-            _zPlay.Close();
-            _zPlay.OpenStream(true, true, ref songData, (uint)songData.Length, TStreamFormat.sfOgg);
-            _zPlay.StartPlayback();
+            _audioPlayer.Play(vorbisData);
         }
     }
 }
