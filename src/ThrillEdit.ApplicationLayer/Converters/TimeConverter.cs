@@ -12,7 +12,15 @@ namespace ThrillEdit.ApplicationLayer.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            TimeSpan timeSpan = (TimeSpan)value;
+            TimeSpan timeSpan;
+            if(value is TimeSpan)
+            {
+                timeSpan = (TimeSpan)value;
+            }
+            else
+            {
+                timeSpan = TimeSpan.FromSeconds((double)value);
+            }
             string minutes = timeSpan.Minutes < 10 ? $"0{timeSpan.Minutes}" : timeSpan.Minutes.ToString();
             string seconds = timeSpan.Seconds < 10 ? $"0{timeSpan.Seconds}" : timeSpan.Seconds.ToString();
 

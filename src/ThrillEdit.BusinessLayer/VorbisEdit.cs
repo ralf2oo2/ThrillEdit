@@ -1,6 +1,7 @@
 ﻿using NAudio.Vorbis;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -11,9 +12,9 @@ namespace ThrillEdit.BusinessLayer
 {
     public class VorbisEdit
     {
-        public List<VorbisData> ExtractVorbisData(string fileName, int bufferSize)
+        public ObservableCollection<VorbisData> ExtractVorbisData(string fileName, int bufferSize)
         {
-            List<VorbisData> vorbisData = new List<VorbisData>();
+            ObservableCollection<VorbisData> vorbisData = new ObservableCollection<VorbisData>();
             long oggBegin = 0;
             long oggEnd = 0;
             bool foundBegin = false;

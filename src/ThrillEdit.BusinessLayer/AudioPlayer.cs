@@ -12,115 +12,190 @@ using ThrillEdit.BusinessLayer.Models;
 
 namespace ThrillEdit.BusinessLayer
 {
-    //TODO : Rewrite entire class
-    public class AudioPlayer : INotifyPropertyChanged
+    public class AudioPlayer
     {
-        private readonly VorbisEdit _vorbisEdit;
-        private bool _isPlaying = false;
-        private bool _stopPlayer = false;
-        private bool _setTime = false;
-        private bool _changingTime = false;
-        private TimeSpan _timeToAppend;
-
-        private TimeSpan _songProgress;
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        private VorbisData _currentSong = new VorbisData();
-
-        public VorbisData CurrentSong
+        public enum PlaybackStopTypes
         {
-            get { return _currentSong; }
-            set { _currentSong = value; OnPropertyChanged(); }
+            PlaybackStoppedByUser, PlaybackStoppedReachingEndOfFile
         }
 
+        public PlaybackStopTypes PlaybackStopType { get; set; }
 
-        public TimeSpan SongProgress
+        private MemoryStream _memoryStream;
+        private VorbisWaveReader _vorbisWaveReader;
+        private WaveChannel32 _waveChannel;
+        private DirectSoundOut _output;
+
+        public event Action PlaybackResumed;
+        public event Action PlaybackStopped;
+        public event Action PlaybackPaused;
+
+        public AudioPlayer(byte[] songArray, float volume)
         {
-            get { return _songProgress; }
-            set 
-            {  
-                _timeToAppend = value;
-                if(!_changingTime)
-                {
-                    _changingTime = true;
-                    Task.Run(() => 
-                    {
-                        Task.Delay(1000);
-                        _setTime = true;
-                        _changingTime = false;
-                    });
-                }
+
+            PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
+
+            _memoryStream = new MemoryStream(songArray);
+            _vorbisWaveReader = new VorbisWaveReader(_memoryStream);
+
+
+            _output = new DirectSoundOut(200);
+
+            _output.PlaybackStopped += _output_PlaybackStopped;
+
+
+            _waveChannel = new WaveChannel32(_vorbisWaveReader);
+            _waveChannel.PadWithZeroes = false;
+
+
+            _output.Init(_waveChannel);
+        }
+
+        public void Play(PlaybackState playbackState, double currentVolumeLevel)
+        {
+            if (playbackState == PlaybackState.Stopped || playbackState == PlaybackState.Paused)
+            {
+
+                _output.Play();
+
+            }
+            _waveChannel.Volume = (float)currentVolumeLevel;
+
+            if (PlaybackResumed != null)
+            {
+
+                PlaybackResumed();
+
             }
         }
 
-        public AudioPlayer(VorbisEdit vorbisEdit)
+        private void _output_PlaybackStopped(object sender, StoppedEventArgs e)
         {
-            _vorbisEdit = vorbisEdit;
+            Dispose();
+
+            if (PlaybackStopped != null)
+            {
+                PlaybackStopped();
+            }
         }
 
         public void Stop()
         {
-            _stopPlayer = true;
-        }
-        public bool IsPlaying()
-        {
-            return _isPlaying;
-        }
-        public void Play(VorbisData vorbisData)
-        {
-            byte[] songData = _vorbisEdit.GetVorbisBytes(vorbisData);
-            if (IsPlaying())
+            if (_output != null)
             {
-                Stop();
+                _output.Stop();
             }
-            while (IsPlaying())
-            {
+        }
 
-            }
-            CurrentSong = vorbisData;
-            Task.Run(() => PlayOggFromByteArrayAsync(songData));
-        }
-        private async Task PlayOggFromByteArrayAsync(byte[] oggData)
+        public void Pause()
         {
-            using (var memoryStream = new MemoryStream(oggData))
-            using (var vorbisStream = new VorbisWaveReader(memoryStream))
-            using (var waveOut = new WaveOutEvent())
+            if (_output != null)
             {
-                waveOut.Init(vorbisStream);
-                waveOut.Play();
-                _isPlaying = true;
-                while (waveOut.PlaybackState != PlaybackState.Stopped)
-                {
-                    while (waveOut.PlaybackState == PlaybackState.Playing)
-                    {
-                        if (_stopPlayer)
-                        {
-                            waveOut.Stop();
-                            CurrentSong = new VorbisData();
-                            _stopPlayer = false;
-                        }
-                        if(_setTime)
-                        {
-                            vorbisStream.CurrentTime = _timeToAppend;
-                            _setTime = false;
-                        }
-                        else
-                        {
-                            _songProgress = waveOut.GetPositionTimeSpan();
-                            OnPropertyChanged(nameof(SongProgress));
-                        }
-                    }
+                _output.Pause();
+
+                if (PlaybackPaused != null)
+                { 
+                    PlaybackPaused();
                 }
-                waveOut.Dispose();
-                vorbisStream.Dispose();
-                memoryStream.Dispose();
-                _isPlaying = false;
             }
         }
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
+
+        public void TogglePlayPause(double currentVolumeLevel)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            if (_output != null)
+            {
+                if (_output.PlaybackState == PlaybackState.Playing)
+                {
+                    Pause();
+                }
+                else
+                {
+                    Play(_output.PlaybackState, currentVolumeLevel);
+                }
+            }
+            else
+            {
+                Play(PlaybackState.Stopped, currentVolumeLevel);
+            }
+        }
+
+        public void Dispose()
+        {
+            if (_output != null)
+            {
+                if (_output.PlaybackState == PlaybackState.Playing)
+                {
+                    _output.Stop();
+                }
+                _output.Dispose();
+                _output = null;
+            }
+
+            if (_vorbisWaveReader != null)
+            {
+                _vorbisWaveReader.Dispose();
+                _vorbisWaveReader = null;
+            }
+
+            if (_memoryStream != null)
+            {
+                _memoryStream.Dispose();
+                _memoryStream = null;
+            }
+            if(_waveChannel != null)
+            {
+                _waveChannel.Dispose();
+                _waveChannel = null;
+            }
+        }
+
+        public double GetLenghtInSeconds()
+        {
+            if (_vorbisWaveReader != null)
+            {
+                return _vorbisWaveReader.TotalTime.TotalSeconds;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        public double GetPositionInSeconds()
+        {
+            if (_vorbisWaveReader != null)
+            {
+                return _vorbisWaveReader.CurrentTime.TotalSeconds;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        public float GetVolume()
+        {
+            if (_waveChannel != null)
+            {
+                return _waveChannel.Volume;
+            }
+            return 1;
+        }
+
+        public void SetPosition(double value)
+        {
+            if (_vorbisWaveReader != null)
+            {
+                _vorbisWaveReader.CurrentTime = TimeSpan.FromSeconds(value);
+            }
+        }
+
+        public void SetVolume(float value)
+        {
+            if (_waveChannel != null)
+            {
+                _waveChannel.Volume = value;
+            }
         }
     }
 }

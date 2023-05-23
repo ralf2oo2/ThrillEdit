@@ -5,12 +5,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ThrillEdit.ApplicationLayer.Views"
              xmlns:converters="clr-namespace:ThrillEdit.ApplicationLayer.Converters"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <converters:ItemIndexMultiConverter x:Key="ItemIndexMultiConverter"/>
         <converters:TimeConverter x:Key="TimeConverter"/>
         <converters:BarProgressMultiConverter x:Key="BarProgressMultiConverter"/>
+        <converters:SelectedVorbisBackgroundColorMultiConverter x:Key="SelectedVorbisBackgroundColorMultiConverter"/>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -21,40 +23,88 @@
             <RowDefinition Height="1*"/>
             <RowDefinition Height="50px"/>
         </Grid.RowDefinitions>
-        <TextBlock x:Name="currentSongTicks" Text="{Binding AudioPlayer.CurrentSong.Duration.Ticks, Mode=OneWay}" Visibility="Hidden"/>
-        <ListBox ItemsSource="{Binding VorbisData}">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock>
-                            <TextBlock.Text>
-                                <MultiBinding Converter="{StaticResource ItemIndexMultiConverter}" StringFormat="Song {0}">
-                                    <Binding RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}" />
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding VorbisData}" Background="#737371" Foreground="White">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0,1,0,1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="10px"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="30px"/>
+                                <ColumnDefinition Width="10px"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.Background>
+                                <MultiBinding Converter="{StaticResource SelectedVorbisBackgroundColorMultiConverter}">
+                                    <Binding Path="DataContext.CurrentlySelectedVorbis" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}"/>
                                     <Binding Path="."/>
                                 </MultiBinding>
-                            </TextBlock.Text>
-                        </TextBlock>
-                        <TextBlock Text="Duration: " Margin="10,0,10,0">
-                            <Run Text="{Binding Duration, Mode=OneWay, Converter={StaticResource TimeConverter}}"/>
-                        </TextBlock>
-                        <Button Command="{Binding DataContext.PlayOggCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBox}}}" CommandParameter="{Binding}" Content=">"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                            </Grid.Background>
+                            <TextBlock Grid.Column="1" HorizontalAlignment="Left">
+                                <TextBlock.Text>
+                                    <MultiBinding Converter="{StaticResource ItemIndexMultiConverter}" StringFormat="Song {0}">
+                                        <Binding RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}" />
+                                        <Binding Path="."/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                            <StackPanel Grid.Column="2" HorizontalAlignment="Right">
+                                <TextBlock Text="{Binding Duration, Mode=OneWay, Converter={StaticResource TimeConverter}}" Margin="10,0,10,0">
+                                </TextBlock>
+                            </StackPanel>
+                            <Button Grid.Column="3" HorizontalAlignment="Right" Width="20" Height="20" Command="{Binding DataContext.PlayVorbisCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ItemsControl}}}" CommandParameter="{Binding}">
+                                <Image Source="../Images/play.png" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
 
         <Border Background="DarkGray" Grid.Row="1" Grid.ColumnSpan="2"></Border>
-        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBlock Text="{Binding AudioPlayer.SongProgress, Mode=OneWay, Converter={StaticResource TimeConverter}}" Margin="0,0,10,0"/>
-            <Slider Width="300px">
-                <Slider.Value>
-                    <MultiBinding Converter="{StaticResource BarProgressMultiConverter}" ConverterParameter="{x:Reference currentSongTicks}">
-                        <Binding Path="AudioPlayer.SongProgress" Mode="TwoWay"/>
-                        <Binding Path="AudioPlayer.CurrentSong.Duration" Mode="OneWay"/>
-                    </MultiBinding>
-                </Slider.Value>
+        <StackPanel Orientation="Vertical" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Height="30" Width="30" Command="{Binding RewindToStartCommand}">
+                    <Image Source="../Images/skip_previous.png" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Button>
+                <Button Height="30" Width="30" Command="{Binding StartPlaybackCommand}">
+                    <Image Source="{Binding PlayPauseImageSource}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Button>
+                <Button Height="30" Width="30" Command="{Binding StopPlaybackCommand}">
+                    <Image Source="../Images/stop.png" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Button>
+                <Button Height="30" Width="30" Command="{Binding ForwardToEndCommand}">
+                    <Image Source="../Images/skip_next.png" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Button>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBlock Text="{Binding CurrentTrackPosition, Mode=OneWay, Converter={StaticResource TimeConverter}}" Margin="0,0,10,0"/>
+                <Slider Minimum="0" Maximum="{Binding CurrentTrackLenght, Mode=OneWay}" Value="{Binding CurrentTrackPosition, Mode=TwoWay}" x:Name="SeekbarControl" Width="300px">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="PreviewMouseDown">
+                            <i:InvokeCommandAction Command="{Binding TrackControlMouseDownCommand}"></i:InvokeCommandAction>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="PreviewMouseUp">
+                            <i:InvokeCommandAction Command="{Binding TrackControlMouseUpCommand}"></i:InvokeCommandAction>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </Slider>
+                <TextBlock Text="{Binding CurrentTrackLenght, Mode=OneWay, Converter={StaticResource TimeConverter}}" Margin="10,0,0,0"/>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Right" VerticalAlignment="Center">
+            <Slider Minimum="0" Maximum="1" Value="{Binding CurrentVolume, Mode=TwoWay}" x:Name="VolumeControl" VerticalAlignment="Center" Width="60px" Margin="0,0,10,0">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="ValueChanged">
+                        <i:InvokeCommandAction Command="{Binding VolumeControlValueChangedCommand}"></i:InvokeCommandAction>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
             </Slider>
-            <TextBlock Text="{Binding AudioPlayer.CurrentSong.Duration, Mode=OneWay, Converter={StaticResource TimeConverter}}" Margin="10,0,0,0"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Left" VerticalAlignment="Center">
+            <CheckBox IsChecked="{Binding AutoPlay, Mode=TwoWay}" Margin="10,0,0,0"/>
+            <TextBlock Text="Autoplay" Margin="5,0,0,0"/>
         </StackPanel>
     </Grid>
 </UserControl>

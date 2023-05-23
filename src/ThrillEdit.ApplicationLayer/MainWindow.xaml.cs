@@ -31,7 +31,6 @@ namespace ThrillEdit.ApplicationLayer
     {
         private readonly VorbisEdit _vorbisEdit;
         private readonly ItemProvider _itemProvider;
-        private readonly AudioPlayer _audioPlayer;
 
         private ViewModelBase _currentViewModel;
 
@@ -51,10 +50,9 @@ namespace ThrillEdit.ApplicationLayer
         }
 
 
-        public MainWindow(VorbisEdit vorbisEdit, AudioPlayer audioPlayer, ItemProvider itemProvider) 
+        public MainWindow(VorbisEdit vorbisEdit, ItemProvider itemProvider) 
         {
             _vorbisEdit = vorbisEdit;
-            _audioPlayer = audioPlayer;
             _itemProvider = itemProvider;
             InitializeComponent();
             DataContext = this;
@@ -75,7 +73,7 @@ namespace ThrillEdit.ApplicationLayer
             Button button = (Button)sender;
             Debug.WriteLine(button.Tag);
 
-            CurrentViewModel = new MusicReplacerViewModel(_vorbisEdit, _audioPlayer, button.Tag.ToString());
+            CurrentViewModel = new MusicReplacerViewModel(_vorbisEdit, button.Tag.ToString());
         }
     }
 }

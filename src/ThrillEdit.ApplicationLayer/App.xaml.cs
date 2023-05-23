@@ -29,18 +29,9 @@ namespace ThrillEdit.ApplicationLayer
                     service.AddSingleton<ItemProvider>();
                     service.AddSingleton
                     (
-                         (services) => new AudioPlayer
-                             (
-                                 services.GetRequiredService<VorbisEdit>()
-                             )
-                    );
-
-                    service.AddSingleton
-                    (
                          (services) => new MainWindow
                              (
                                  services.GetRequiredService<VorbisEdit>(),
-                                 services.GetRequiredService<AudioPlayer>(),
                                  services.GetRequiredService<ItemProvider>()
                              )
                     );
