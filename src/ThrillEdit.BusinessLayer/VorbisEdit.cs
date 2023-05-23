@@ -12,6 +12,75 @@ namespace ThrillEdit.BusinessLayer
 {
     public class VorbisEdit
     {
+        public bool CheckForVorbisData(string fileName, int bufferSize)
+        {
+            long oggBegin = 0;
+            long oggEnd = 0;
+            bool foundBegin = false;
+            bool foundEnd = false;
+
+            byte[] buffer = new byte[bufferSize];
+            byte[] headerBytes = new byte[27];
+            long lastOffset = 0;
+            using (var fs = new FileStream(fileName, FileMode.Open))
+            {
+                while (lastOffset < fs.Length)
+                {
+                    int bytesRead = fs.Read(buffer, 0, buffer.Length);
+                    if (bytesRead == 0)
+                    {
+                        break;
+                    }
+                    for (int i = 0; i < bytesRead; i++)
+                    {
+                        fs.Seek(lastOffset + i, SeekOrigin.Begin);
+                        fs.Read(headerBytes, 0, headerBytes.Length);
+
+                        if (headerBytes[0] == (byte)'O' &&  // 'O'
+                            headerBytes[1] == (byte)'g' &&  // 'g'
+                            headerBytes[2] == (byte)'g' &&  // 'g'
+                            headerBytes[3] == (byte)'S')    // 'S'
+                        {
+                            if (headerBytes[5] == 0x2)
+                            {
+                                oggBegin = lastOffset + i;
+                                foundBegin = true;
+                            }
+                            if (foundBegin && (headerBytes[5] == 0x4 || headerBytes[5] == 0x5))
+                            {
+                                foundEnd = true;
+                                oggEnd = lastOffset + i + 27;
+
+                                uint trailingSize = headerBytes[26];
+                                byte[] trailingFrames = new byte[trailingSize];
+
+                                long position = fs.Position;
+                                long readResult = -1;
+                                long seekResult = -1;
+                                seekResult = fs.Seek(oggEnd, SeekOrigin.Begin);
+                                readResult = fs.Read(trailingFrames, 0, (int)trailingSize);
+                                fs.Seek(oggEnd, SeekOrigin.Current);
+
+                                oggEnd += trailingSize;
+
+                                for (long j = 0; j < trailingSize; j++)
+                                {
+                                    oggEnd += trailingFrames[j];
+                                }
+                            }
+                            if (foundBegin && foundEnd)
+                            {
+                                return true;
+                            }
+                        }
+
+                    }
+                    lastOffset += bytesRead;
+                }
+            }
+            return false;
+        }
+
         public ObservableCollection<VorbisData> ExtractVorbisData(string fileName, int bufferSize)
         {
             ObservableCollection<VorbisData> vorbisData = new ObservableCollection<VorbisData>();

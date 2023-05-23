@@ -21,6 +21,7 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
     {
         private readonly VorbisEdit _vorbisEdit;
         private readonly DispatcherTimer _timer;
+        private readonly ProgressBar _progressBar;
         private AudioPlayer _audioPlayer;
 
         private bool _startingSong = false;
@@ -175,9 +176,10 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
 
         private PlaybackState _playbackState;
 
-        public MusicReplacerViewModel(VorbisEdit vorbisEdit, string filePath)
+        public MusicReplacerViewModel(VorbisEdit vorbisEdit, string filePath, ProgressBar progressBar)
         {
             _vorbisEdit = vorbisEdit;
+            _progressBar = progressBar;
             LoadCommands();
             VorbisData = _vorbisEdit.ExtractVorbisData(filePath, 5242880);
 

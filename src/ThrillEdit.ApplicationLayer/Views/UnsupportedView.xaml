@@ -1,0 +1,15 @@
+﻿<UserControl x:Class="ThrillEdit.ApplicationLayer.Views.UnsupportedView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ThrillEdit.ApplicationLayer.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Bottom" Orientation="Vertical">
+            <TextBlock Foreground="White" Text="Editing this file is currently not supported by ThrillEdit" FontWeight="Bold" TextWrapping="Wrap"/>
+            <Image Source="../Images/unsupported.png" Height="200" Width="100" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,20,0,0"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

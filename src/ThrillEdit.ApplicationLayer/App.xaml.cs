@@ -27,12 +27,22 @@ namespace ThrillEdit.ApplicationLayer
                 .ConfigureServices((context, service) => {
                     service.AddSingleton<VorbisEdit>();
                     service.AddSingleton<ItemProvider>();
+                    service.AddSingleton<ProgressBar>();
                     service.AddSingleton
                     (
                          (services) => new MainWindow
                              (
+                                 services.GetRequiredService<ViewModelSelector>(),
+                                 services.GetRequiredService<ItemProvider>(),
+                                 services.GetRequiredService<ProgressBar>()
+                             )
+                    );
+                    service.AddSingleton
+                    (
+                         (services) => new ViewModelSelector
+                             (
                                  services.GetRequiredService<VorbisEdit>(),
-                                 services.GetRequiredService<ItemProvider>()
+                                 services.GetRequiredService<ProgressBar>()
                              )
                     );
                 })

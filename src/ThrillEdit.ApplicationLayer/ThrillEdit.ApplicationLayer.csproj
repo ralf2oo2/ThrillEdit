@@ -14,6 +14,7 @@
     <None Remove="Images\skip_next.png" />
     <None Remove="Images\skip_previous.png" />
     <None Remove="Images\stop.png" />
+    <None Remove="Images\Unsupported.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,12 +33,14 @@
     <Content Include="Images\stop.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Images\unsupported.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
-    <PackageReference Include="MVVMEssentials.WPF" Version="1.0.3" />
   </ItemGroup>
 
   <ItemGroup>

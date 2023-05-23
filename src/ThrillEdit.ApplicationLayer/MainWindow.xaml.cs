@@ -29,8 +29,9 @@ namespace ThrillEdit.ApplicationLayer
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        private readonly VorbisEdit _vorbisEdit;
+        private readonly ViewModelSelector _viewModelSelector;
         private readonly ItemProvider _itemProvider;
+        private readonly ProgressBar _progressBar;
 
         private ViewModelBase _currentViewModel;
 
@@ -49,11 +50,21 @@ namespace ThrillEdit.ApplicationLayer
             set { _fileTreeItems = value; OnPropertyChanged(); }
         }
 
+        private string _currentFile;
 
-        public MainWindow(VorbisEdit vorbisEdit, ItemProvider itemProvider) 
+        public string CurrentFile
         {
-            _vorbisEdit = vorbisEdit;
+            get { return _currentFile; }
+            set { _currentFile = value; OnPropertyChanged(); }
+        }
+
+        public ProgressBar ProgressBar => _progressBar;
+
+        public MainWindow(ViewModelSelector viewModelSelector, ItemProvider itemProvider, ProgressBar progressBar) 
+        {
+            _viewModelSelector = viewModelSelector;
             _itemProvider = itemProvider;
+            _progressBar = progressBar;
             InitializeComponent();
             DataContext = this;
 
@@ -73,7 +84,8 @@ namespace ThrillEdit.ApplicationLayer
             Button button = (Button)sender;
             Debug.WriteLine(button.Tag);
 
-            CurrentViewModel = new MusicReplacerViewModel(_vorbisEdit, button.Tag.ToString());
+            CurrentFile = button.Tag.ToString();
+            CurrentViewModel = _viewModelSelector.GetViewModel(button.Tag.ToString());
         }
     }
 }

@@ -7,10 +7,12 @@
         xmlns:Models="clr-namespace:ThrillEdit.BusinessLayer.Models;assembly=ThrillEdit.BusinessLayer"
         xmlns:views="clr-namespace:ThrillEdit.ApplicationLayer.Views"
         xmlns:viewmodels="clr-namespace:ThrillEdit.ApplicationLayer.ViewModels"
+        xmlns:converters="clr-namespace:ThrillEdit.ApplicationLayer.Converters"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="ThrillEdit" Height="450" Width="800" MinHeight="450" MinWidth="800">
     <Window.Resources>
 
+        <converters:SelectedFileBackgroundColorMultiConverter x:Key="SelectedFileBackgroundColorMultiConverter"/>
         <HierarchicalDataTemplate DataType="{x:Type Models:DirectoryItem}"
                                   ItemsSource="{Binding Items}">
             <TextBlock Text="{Binding Path=Name}" ToolTip="{Binding Path=Path}" Foreground="White" />
@@ -30,7 +32,14 @@
                         <EventSetter Event="MouseDoubleClick" Handler="OnItemMouseDoubleClick" />
                     </Style>
                 </Button.Style>
-                <TextBlock Text="{Binding Path=Name}" ToolTip="{Binding Path=Path}" Foreground="White"/>
+                <TextBlock Text="{Binding Path=Name}" ToolTip="{Binding Path=Path}" Foreground="White">
+                    <TextBlock.Background>
+                        <MultiBinding Converter="{StaticResource SelectedFileBackgroundColorMultiConverter}">
+                            <Binding Path="DataContext.CurrentFile" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type TreeView}}"/>
+                            <Binding Path="."/>
+                        </MultiBinding>
+                    </TextBlock.Background>
+                </TextBlock>
             </Button>
         </DataTemplate>
     </Window.Resources>
@@ -49,6 +58,9 @@
             <ContentControl.Resources>
                 <DataTemplate DataType="{x:Type viewmodels:MusicReplacerViewModel}">
                     <views:MusicReplacerView/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type viewmodels:UnsupportedViewModel}">
+                    <views:UnsupportedView/>
                 </DataTemplate>
             </ContentControl.Resources>
         </ContentControl>
