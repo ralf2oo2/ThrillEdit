@@ -18,9 +18,9 @@ namespace ThrillEdit.ApplicationLayer.Views
     /// <summary>
     /// Interaction logic for MusicReplacerView.xaml
     /// </summary>
-    public partial class MusicReplacerView : UserControl
+    public partial class MusicPlayerView : UserControl
     {
-        public MusicReplacerView()
+        public MusicPlayerView()
         {
             InitializeComponent();
         }

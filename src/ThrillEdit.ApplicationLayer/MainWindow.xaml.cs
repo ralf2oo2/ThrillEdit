@@ -80,11 +80,16 @@ namespace ThrillEdit.ApplicationLayer
 
         private void OnItemMouseDoubleClick(object sender, RoutedEventArgs e)
         {
+            if (_progressBar.DisableWindow) return;
             // TODO: Check which view to show
             Button button = (Button)sender;
             Debug.WriteLine(button.Tag);
 
             CurrentFile = button.Tag.ToString();
+            if(CurrentViewModel != null)
+            {
+                CurrentViewModel.Cleanup();
+            }
             CurrentViewModel = _viewModelSelector.GetViewModel(button.Tag.ToString());
         }
     }

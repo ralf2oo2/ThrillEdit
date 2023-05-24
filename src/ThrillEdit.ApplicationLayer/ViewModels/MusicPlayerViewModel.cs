@@ -17,7 +17,7 @@ using System.Runtime.CompilerServices;
 
 namespace ThrillEdit.ApplicationLayer.ViewModels
 {
-    class MusicReplacerViewModel : ViewModelBase
+    class MusicPlayerViewModel : ViewModelBase
     {
         private readonly VorbisEdit _vorbisEdit;
         private readonly DispatcherTimer _timer;
@@ -37,6 +37,15 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
         private ObservableCollection<VorbisData> _vorbisData;
         private VorbisData _currentlyPlayingVorbis;
         private VorbisData _currentlySelectedVorbis;
+
+        private ViewModelBase _SelectedEditorViewModel;
+
+        public ViewModelBase SelectedEditorViewModel
+        {
+            get { return _SelectedEditorViewModel; }
+            set { _SelectedEditorViewModel = value; OnPropertyChanged(); }
+        }
+
 
         public string Title
         {
@@ -149,6 +158,8 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
         public ICommand TrackControlMouseUpCommand { get; set; }
         public ICommand VolumeControlValueChangedCommand { get; set; }
 
+        public ICommand OpenReplacerViewCommand { get; set; }
+
         private void LoadCommands()
         {
             // Menu commands
@@ -167,6 +178,8 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
             TrackControlMouseDownCommand = new RelayCommand(TrackControlMouseDown, CanTrackControlMouseDown);
             TrackControlMouseUpCommand = new RelayCommand(TrackControlMouseUp, CanTrackControlMouseUp);
             VolumeControlValueChangedCommand = new RelayCommand(VolumeControlValueChanged, CanVolumeControlValueChanged);
+
+            OpenReplacerViewCommand = new RelayCommand(OpenReplacerView, CanOpenReplacerView);
         }
 
         private enum PlaybackState
@@ -176,12 +189,14 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
 
         private PlaybackState _playbackState;
 
-        public MusicReplacerViewModel(VorbisEdit vorbisEdit, string filePath, ProgressBar progressBar)
+        public MusicPlayerViewModel(VorbisEdit vorbisEdit, string filePath, ProgressBar progressBar)
         {
             _vorbisEdit = vorbisEdit;
             _progressBar = progressBar;
             LoadCommands();
-            VorbisData = _vorbisEdit.ExtractVorbisData(filePath, 5242880);
+
+            _progressBar.DisableWindow = true;
+            Task.Run(() => LoadVorbisData(filePath));
 
             _playbackState = PlaybackState.Stopped;
             _timer = new DispatcherTimer();
@@ -192,12 +207,23 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
             CurrentVolume = 1;
             PlayPauseImageSource = "../Images/play.png";
         }
-        public void CloseWindow()
+
+        private async Task LoadVorbisData(string filePath)
+        {
+            Progress<(long current, long total)> progress = new Progress<(long current, long total)>();
+            _progressBar.SubscribeToProgress(progress);
+            VorbisData = await _vorbisEdit.ExtractVorbisDataAsync(filePath, 5242880, progress);
+            _progressBar.ProgressBarPercentage = 0;
+            _progressBar.DisableWindow = false;
+        }
+        public override void Cleanup()
         {
             if (_audioPlayer != null)
             {
                 _audioPlayer.Dispose();
+                while (!_audioPlayer.IsDisposed()) { }
             }
+            
         }
 
         private void RewindToStart(object p)
@@ -283,6 +309,16 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
             return false;
         }
 
+        private void OpenReplacerView(object p)
+        {
+            SelectedEditorViewModel = new MusicReplacerEditorViewModel((VorbisData)p);
+        }
+
+        private bool CanOpenReplacerView(object p)
+        {
+            return true;
+        }
+
         private void TrackControlMouseDown(object p)
         {
             if (_audioPlayer != null)
@@ -352,6 +388,8 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
         {
             return !_startingSong;
         }
+
+
         private void _audioPlayer_PlaybackStopped()
         {
             _playbackState = PlaybackState.Stopped;

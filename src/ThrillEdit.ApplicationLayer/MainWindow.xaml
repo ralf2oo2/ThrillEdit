@@ -13,6 +13,7 @@
     <Window.Resources>
 
         <converters:SelectedFileBackgroundColorMultiConverter x:Key="SelectedFileBackgroundColorMultiConverter"/>
+        <converters:BoolInvertConverter x:Key="BoolInvertConverter"/>
         <HierarchicalDataTemplate DataType="{x:Type Models:DirectoryItem}"
                                   ItemsSource="{Binding Items}">
             <TextBlock Text="{Binding Path=Name}" ToolTip="{Binding Path=Path}" Foreground="White" />
@@ -43,6 +44,9 @@
             </Button>
         </DataTemplate>
     </Window.Resources>
+    <Window.IsEnabled>
+        <Binding Path="DataContext.ProgressBar.DisableWindow" Converter="{StaticResource BoolInvertConverter}"/>
+    </Window.IsEnabled>
     <Grid Background="#465991">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200px"/>
@@ -56,8 +60,8 @@
         </TreeView>
         <ContentControl Content="{Binding CurrentViewModel}" Grid.Column="1">
             <ContentControl.Resources>
-                <DataTemplate DataType="{x:Type viewmodels:MusicReplacerViewModel}">
-                    <views:MusicReplacerView/>
+                <DataTemplate DataType="{x:Type viewmodels:MusicPlayerViewModel}">
+                    <views:MusicPlayerView/>
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type viewmodels:UnsupportedViewModel}">
                     <views:UnsupportedView/>
@@ -65,6 +69,6 @@
             </ContentControl.Resources>
         </ContentControl>
         <Border Grid.Row="1" Grid.ColumnSpan="2" Background="#FF8F2C"/>
-        <ProgressBar Grid.Row="1" Grid.ColumnSpan="2" Background="#FF8F2C" Margin="0,3" BorderThickness="0" Value="0" Foreground="#232A46"/>
+        <ProgressBar Grid.Row="1" Grid.ColumnSpan="2" Background="#FF8F2C" Value="{Binding ProgressBar.ProgressBarPercentage}" Margin="0,3" BorderThickness="0" Foreground="#232A46"/>
     </Grid>
 </Window>

@@ -16,5 +16,7 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
+
+        public virtual void Cleanup() { }
     }
 }

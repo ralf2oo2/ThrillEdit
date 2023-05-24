@@ -182,6 +182,111 @@ namespace ThrillEdit.BusinessLayer
             return vorbisData;
         }
 
+        public async Task<ObservableCollection<VorbisData>> ExtractVorbisDataAsync(string fileName, int bufferSize, IProgress<(long current, long total)> progress)
+        {
+            ObservableCollection<VorbisData> vorbisData = new ObservableCollection<VorbisData>();
+            long oggBegin = 0;
+            long oggEnd = 0;
+            bool foundBegin = false;
+            bool foundEnd = false;
+
+            byte[] buffer = new byte[bufferSize];
+            byte[] headerBytes = new byte[27];
+            long lastOffset = 0;
+            using (var fs = new FileStream(fileName, FileMode.Open))
+            {
+                while (lastOffset < fs.Length)
+                {
+                    int bytesRead = fs.Read(buffer, 0, buffer.Length);
+                    if (bytesRead == 0)
+                    {
+                        break;
+                    }
+                    for (int i = 0; i < bytesRead; i++)
+                    {
+                        fs.Seek(lastOffset + i, SeekOrigin.Begin);
+                        fs.Read(headerBytes, 0, headerBytes.Length);
+
+                        if (headerBytes[0] == (byte)'O' &&  // 'O'
+                            headerBytes[1] == (byte)'g' &&  // 'g'
+                            headerBytes[2] == (byte)'g' &&  // 'g'
+                            headerBytes[3] == (byte)'S')    // 'S'
+                        {
+                            if (headerBytes[5] == 0x2)
+                            {
+                                oggBegin = lastOffset + i;
+                                foundBegin = true;
+                            }
+                            if (foundBegin && (headerBytes[5] == 0x4 || headerBytes[5] == 0x5))
+                            {
+                                foundEnd = true;
+                                oggEnd = lastOffset + i + 27;
+
+                                uint trailingSize = headerBytes[26];
+                                byte[] trailingFrames = new byte[trailingSize];
+
+                                long position = fs.Position;
+                                long readResult = -1;
+                                long seekResult = -1;
+                                seekResult = fs.Seek(oggEnd, SeekOrigin.Begin);
+                                readResult = fs.Read(trailingFrames, 0, (int)trailingSize);
+                                if (seekResult != -1) // Finish error check
+                                {
+                                    //throw new Exception();
+                                }
+
+                                fs.Seek(oggEnd, SeekOrigin.Current);
+
+                                oggEnd += trailingSize;
+
+                                for (long j = 0; j < trailingSize; j++)
+                                {
+                                    oggEnd += trailingFrames[j];
+                                }
+                            }
+                            if (foundBegin && foundEnd)
+                            {
+                                foundBegin = false;
+                                foundEnd = false;
+
+                                VorbisData vorbis = new VorbisData();
+                                vorbis.Origin = fileName;
+                                vorbis.StartPos = oggBegin;
+                                vorbis.EndPos = oggEnd - 1;
+
+
+
+                                vorbisData.Add(vorbis);
+                                Debug.WriteLine("Origin: " + fileName);
+                                Debug.WriteLine("Begin: " + oggBegin);
+                                Debug.WriteLine("End: " + oggEnd);
+                            }
+                        }
+
+                    }
+                    lastOffset += bytesRead;
+                    Debug.WriteLine($"{lastOffset} : {fs.Length}");
+                    progress.Report((lastOffset, fs.Length));
+                }
+            }
+            foreach (VorbisData vorbis in vorbisData)
+            {
+                MemoryStream s = new MemoryStream(GetVorbisBytes(vorbis));
+
+                using (var vorbisReader = new NVorbis.VorbisReader(s, true))
+                {
+                    // get the channels & sample rate
+                    vorbis.Duration = vorbisReader.TotalTime;
+                    vorbis.Rate = vorbisReader.SampleRate;
+                    vorbis.SongName = $"Song {vorbisData.IndexOf(vorbis) + 1}";
+                    Debug.WriteLine("Rate: " + vorbis.Rate);
+                    Debug.WriteLine("Duration: " + vorbis.Duration.Minutes);
+                }
+            }
+            progress.Report((100, 100));
+            return vorbisData;
+        }
+
         /*public List<VorbisData> ExtractVorbisDataOld(string fileName, int bufferSize)
         {
             List<VorbisData> vorbisData = new List<VorbisData>();

@@ -149,6 +149,15 @@ namespace ThrillEdit.BusinessLayer
             }
         }
 
+        public bool IsDisposed()
+        {
+            if(_vorbisWaveReader == null && _memoryStream == null && _output == null && _waveChannel == null)
+            {
+                return true;
+            }
+            return false;
+        }
+
         public double GetLenghtInSeconds()
         {
             if (_vorbisWaveReader != null)

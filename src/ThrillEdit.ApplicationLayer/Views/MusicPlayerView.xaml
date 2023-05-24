@@ -1,9 +1,11 @@
-﻿<UserControl x:Class="ThrillEdit.ApplicationLayer.Views.MusicReplacerView"
+﻿<UserControl x:Class="ThrillEdit.ApplicationLayer.Views.MusicPlayerView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ThrillEdit.ApplicationLayer.Views"
+             xmlns:views="clr-namespace:ThrillEdit.ApplicationLayer.Views"
+             xmlns:viewmodels="clr-namespace:ThrillEdit.ApplicationLayer.ViewModels"
              xmlns:converters="clr-namespace:ThrillEdit.ApplicationLayer.Converters"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d" 
@@ -27,7 +29,7 @@
             <ItemsControl ItemsSource="{Binding VorbisData}" Background="#737371" Foreground="White">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Grid Margin="0,1,0,1">
+                        <Grid Margin="0,1,0,1" Tag="{Binding DataContext.OpenReplacerViewCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ItemsControl}}}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="10px"/>
                                 <ColumnDefinition Width="1*"/>
@@ -35,20 +37,18 @@
                                 <ColumnDefinition Width="30px"/>
                                 <ColumnDefinition Width="10px"/>
                             </Grid.ColumnDefinitions>
+                            <Grid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header = "Replace" Command="{Binding Path=Parent.PlacementTarget.Tag, RelativeSource={RelativeSource Self}}" CommandParameter="{Binding}"/>
+                                </ContextMenu>
+                            </Grid.ContextMenu>
                             <Grid.Background>
                                 <MultiBinding Converter="{StaticResource SelectedVorbisBackgroundColorMultiConverter}">
                                     <Binding Path="DataContext.CurrentlySelectedVorbis" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}"/>
                                     <Binding Path="."/>
                                 </MultiBinding>
                             </Grid.Background>
-                            <TextBlock Grid.Column="1" HorizontalAlignment="Left">
-                                <TextBlock.Text>
-                                    <MultiBinding Converter="{StaticResource ItemIndexMultiConverter}" StringFormat="Song {0}">
-                                        <Binding RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}" />
-                                        <Binding Path="."/>
-                                    </MultiBinding>
-                                </TextBlock.Text>
-                            </TextBlock>
+                            <TextBlock Grid.Column="1" HorizontalAlignment="Left" Text="{Binding SongName}"/>
                             <StackPanel Grid.Column="2" HorizontalAlignment="Right">
                                 <TextBlock Text="{Binding Duration, Mode=OneWay, Converter={StaticResource TimeConverter}}" Margin="10,0,10,0">
                                 </TextBlock>
@@ -61,6 +61,14 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
+
+        <ContentControl Content="{Binding SelectedEditorViewModel}" Grid.Column="1" Background="AliceBlue">
+            <ContentControl.Resources>
+                <DataTemplate DataType="{x:Type viewmodels:MusicReplacerEditorViewModel}">
+                    <views:MusicReplacerEditorView/>
+                </DataTemplate>
+            </ContentControl.Resources>
+        </ContentControl>
 
         <Border Background="DarkGray" Grid.Row="1" Grid.ColumnSpan="2"></Border>
         <StackPanel Orientation="Vertical" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center">

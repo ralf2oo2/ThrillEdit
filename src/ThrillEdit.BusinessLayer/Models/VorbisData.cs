@@ -50,5 +50,14 @@ namespace ThrillEdit.BusinessLayer.Models
         {
             get { return (_endPos - _startPos) + 1; }
         }
+
+        private string _songName;
+
+        public string SongName
+        {
+            get { return _songName; }
+            set { _songName = value; }
+        }
+
     }
 }

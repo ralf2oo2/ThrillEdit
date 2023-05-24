@@ -22,7 +22,7 @@ namespace ThrillEdit.ApplicationLayer
         {
             if(_vorbisEdit.CheckForVorbisData(filePath, 5242880))
             {
-                return new MusicReplacerViewModel(_vorbisEdit, filePath, _progressBar);
+                return new MusicPlayerViewModel(_vorbisEdit, filePath, _progressBar);
             }
             return new UnsupportedViewModel();
         }
