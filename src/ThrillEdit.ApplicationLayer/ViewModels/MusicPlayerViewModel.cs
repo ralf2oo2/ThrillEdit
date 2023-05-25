@@ -14,6 +14,7 @@ using ThrillEdit.BusinessLayer.Extentions;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using System.Windows.Threading;
 using System.Runtime.CompilerServices;
+using System.Web;
 
 namespace ThrillEdit.ApplicationLayer.ViewModels
 {
@@ -23,6 +24,8 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
         private readonly DispatcherTimer _timer;
         private readonly ProgressBar _progressBar;
         private AudioPlayer _audioPlayer;
+
+        private string _currentFilePath;
 
         private bool _startingSong = false;
 
@@ -193,6 +196,7 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
         {
             _vorbisEdit = vorbisEdit;
             _progressBar = progressBar;
+            _currentFilePath = filePath;
             LoadCommands();
 
             _progressBar.DisableWindow = true;
@@ -215,6 +219,12 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
             VorbisData = await _vorbisEdit.ExtractVorbisDataAsync(filePath, 5242880, progress);
             _progressBar.ProgressBarPercentage = 0;
             _progressBar.DisableWindow = false;
+        }
+        private void ReloadVorbisData()
+        {
+            SelectedEditorViewModel = null;
+            _progressBar.DisableWindow = true;
+            Task.Run(() => LoadVorbisData(_currentFilePath));
         }
         public override void Cleanup()
         {
@@ -311,7 +321,7 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
 
         private void OpenReplacerView(object p)
         {
-            SelectedEditorViewModel = new MusicReplacerEditorViewModel((VorbisData)p);
+            SelectedEditorViewModel = new MusicReplacerEditorViewModel(_vorbisEdit, (VorbisData)p, ReloadVorbisData);
         }
 
         private bool CanOpenReplacerView(object p)

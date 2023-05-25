@@ -175,6 +175,7 @@ namespace ThrillEdit.BusinessLayer
                     // get the channels & sample rate
                     vorbis.Duration = vorbisReader.TotalTime;
                     vorbis.Rate = vorbisReader.SampleRate;
+                    vorbis.SongName = $"Song {vorbisData.IndexOf(vorbis) + 1}";
                     Debug.WriteLine("Rate: " + vorbis.Rate);
                     Debug.WriteLine("Duration: " + vorbis.Duration.Minutes);
                 }
@@ -379,13 +380,15 @@ namespace ThrillEdit.BusinessLayer
             return vorbisData;
         }*/
 
-        public void ReplaceVorbisData(List<DataReplacement> dataReplacements, string fileName, string newFile)
+        public void ReplaceVorbisData(List<DataReplacement> dataReplacements, string filePath)
         {
             dataReplacements = dataReplacements.OrderBy(x => x.OriginalData.StartPos).ToList();
+            Directory.CreateDirectory("Temp");
+            string tempPath = $"Temp//{Path.GetFileName(filePath)}";
 
-            using (var originFs = new FileStream(fileName, FileMode.Open))
+            using (var originFs = new FileStream(filePath, FileMode.Open))
             {
-                using (var targetFs = new FileStream(newFile, FileMode.Create, FileAccess.Write))
+                using (var targetFs = new FileStream(tempPath, FileMode.Create, FileAccess.Write))
                 {
                     DataReplacement dataReplacement = dataReplacements.First();
                     originFs.Seek(0, SeekOrigin.Begin);
@@ -424,7 +427,13 @@ namespace ThrillEdit.BusinessLayer
                         dataReplacements.Remove(currentDataReplacement);
                     }
                 }
+
             }
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+            File.Move(tempPath, filePath);
         }
 
         public byte[] GetVorbisBytes(VorbisData vorbisData)

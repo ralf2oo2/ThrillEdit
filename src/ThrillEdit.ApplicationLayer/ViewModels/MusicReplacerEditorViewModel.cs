@@ -1,17 +1,21 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using ThrillEdit.ApplicationLayer.Commands;
+using ThrillEdit.BusinessLayer;
 using ThrillEdit.BusinessLayer.Models;
 
 namespace ThrillEdit.ApplicationLayer.ViewModels
 {
     public class MusicReplacerEditorViewModel : ViewModelBase
     {
+		private readonly VorbisEdit _vorbisEdit;
 		private VorbisData _selectedVorbisData;
+		private readonly Action _reloadMethod;
 
 		public VorbisData SelectedVorbisData
 		{
@@ -27,21 +31,62 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
 			set { _replacementVorbisData = value; OnPropertyChanged(); }
 		}
 
-		public ICommand ReplaceSongCommand { get; set; }
+		private string _selectedPath;
 
-		public MusicReplacerEditorViewModel(VorbisData selectedVorbisData)
+		public string SelectedPath
 		{
-			SelectedVorbisData = selectedVorbisData;
-			ReplaceSongCommand = new RelayCommand(ReplaceSong, CanReplaceSong);
+			get { return _selectedPath; }
+			set { _selectedPath = value; OnPropertyChanged(); }
 		}
 
-		private void ReplaceSong(object p)
-		{
 
+		public ICommand ReplaceSongCommand { get; set; }
+        public ICommand OpenFileCommand { get; set; }
+
+        public MusicReplacerEditorViewModel(VorbisEdit vorbisEdit, VorbisData selectedVorbisData, Action reloadMethod)
+		{
+			_vorbisEdit = vorbisEdit;
+			_reloadMethod = reloadMethod;
+			SelectedVorbisData = selectedVorbisData;
+			ReplaceSongCommand = new RelayCommand(ReplaceSong, CanReplaceSong);
+			OpenFileCommand = new RelayCommand(OpenFile, CanOpenFile);
+		}
+
+        private void OpenFile(object p)
+        {
+			var ofd = new OpenFileDialog();
+			ofd.Multiselect = false;
+			ofd.Filter = "Vorbis files (*.ogg) | *.ogg;";
+			var result = ofd.ShowDialog();
+			if(result == true)
+			{
+				SelectedPath = ofd.FileName;
+                if (_vorbisEdit.CheckForVorbisData(SelectedPath, 5242880))
+                {
+                    VorbisData replacementVorbis = _vorbisEdit.ExtractVorbisData(SelectedPath, 5242880)[0];
+                    replacementVorbis.SongName = ofd.SafeFileName.Remove(ofd.SafeFileName.Length - 4);
+                    ReplacementVorbisData = replacementVorbis;
+                }
+            }
+        }
+        private bool CanOpenFile(object p)
+        {
+            return true;
+        }
+
+        private void ReplaceSong(object p)
+		{
+			DataReplacement dataReplacement = new DataReplacement { OriginalData = SelectedVorbisData, newData = ReplacementVorbisData };
+			_vorbisEdit.ReplaceVorbisData(new List<DataReplacement> { dataReplacement }, SelectedVorbisData.Origin);
+			_reloadMethod();
 		}
         private bool CanReplaceSong(object p)
         {
-			return true;
+			if(ReplacementVorbisData != null)
+			{
+				return true;
+			}
+			return false;
         }
     }
 }

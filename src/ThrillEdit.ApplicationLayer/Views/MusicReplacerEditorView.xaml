@@ -18,12 +18,16 @@
                 <TextBlock Text="{Binding SelectedVorbisData.Duration, Mode=OneWay, Converter={StaticResource TimeConverter}}" Foreground="White" Margin="30,0,0,0"/>
             </StackPanel>
 
-            <TextBlock Text="Replacement Song" Foreground="White" FontSize="20" FontWeight="Bold"/>
+            <TextBlock Text="Replacement Song" Foreground="White" FontSize="20" FontWeight="Bold" Margin="0,0,0,10"/>
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="{Binding ReplacementVorbis.SongName}" Foreground="White" Margin="0,0,30,0"/>
-                <TextBlock Text="{Binding ReplacementVorbis.Duration, Mode=OneWay, Converter={StaticResource TimeConverter}}" Foreground="White" Margin="30,0,0,0"/>
+                <TextBox Text="{Binding SelectedPath, Mode=TwoWay}" Width="190" IsReadOnly="True"/>
+                <Button Content="..." Command="{Binding OpenFileCommand}"/>
             </StackPanel>
-            <Button Content="Replace" Padding="10,5,10,5"/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding ReplacementVorbisData.SongName}" Foreground="White" Margin="0,0,30,0"/>
+                <TextBlock Text="{Binding ReplacementVorbisData.Duration, Mode=OneWay, Converter={StaticResource TimeConverter}}" Foreground="White" Margin="30,0,0,0"/>
+            </StackPanel>
+            <Button Content="Replace" Padding="10,5,10,5" Command="{Binding ReplaceSongCommand}"/>
         </StackPanel>
     </Grid>
 </UserControl>
