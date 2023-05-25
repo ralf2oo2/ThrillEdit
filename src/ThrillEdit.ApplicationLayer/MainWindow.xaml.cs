@@ -32,6 +32,7 @@ namespace ThrillEdit.ApplicationLayer
         private readonly ViewModelSelector _viewModelSelector;
         private readonly ItemProvider _itemProvider;
         private readonly ProgressBar _progressBar;
+        private readonly ApplicationSettings _applicationSettings;
 
         private ViewModelBase _currentViewModel;
 
@@ -60,15 +61,16 @@ namespace ThrillEdit.ApplicationLayer
 
         public ProgressBar ProgressBar => _progressBar;
 
-        public MainWindow(ViewModelSelector viewModelSelector, ItemProvider itemProvider, ProgressBar progressBar) 
+        public MainWindow(ViewModelSelector viewModelSelector, ItemProvider itemProvider, ProgressBar progressBar, ApplicationSettings applicationSettings) 
         {
             _viewModelSelector = viewModelSelector;
             _itemProvider = itemProvider;
             _progressBar = progressBar;
+            _applicationSettings = applicationSettings;
             InitializeComponent();
             DataContext = this;
-
-            _fileTreeItems = _itemProvider.GetItems(@"D:\\SteamLibrary\\steamapps\\common\\Thrillville Off the Rails", new string[] { "zap"});    
+            Settings settings = _applicationSettings.GetApplicationSettings();
+            _fileTreeItems = _itemProvider.GetItems(settings.GameDirectory, new string[] { "zap" });    
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -81,7 +83,6 @@ namespace ThrillEdit.ApplicationLayer
         private void OnItemMouseDoubleClick(object sender, RoutedEventArgs e)
         {
             if (_progressBar.DisableWindow) return;
-            // TODO: Check which view to show
             Button button = (Button)sender;
             Debug.WriteLine(button.Tag);
 

@@ -15,6 +15,8 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using System.Windows.Threading;
 using System.Runtime.CompilerServices;
 using System.Web;
+using System.IO;
+using System.Windows.Forms;
 
 namespace ThrillEdit.ApplicationLayer.ViewModels
 {
@@ -321,7 +323,31 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
 
         private void OpenReplacerView(object p)
         {
-            SelectedEditorViewModel = new MusicReplacerEditorViewModel(_vorbisEdit, (VorbisData)p, ReloadVorbisData);
+            Tuple<VorbisData, int> parameters = (Tuple<VorbisData, int>)p;
+            switch(parameters.Item2)
+            {
+                case 1:
+                    SelectedEditorViewModel = new MusicReplacerEditorViewModel(_vorbisEdit, parameters.Item1, ReloadVorbisData);
+                    break;
+                case 2:
+                    byte[] vorbisBytes = _vorbisEdit.GetVorbisBytes(parameters.Item1);
+                    Stream stream;
+                    SaveFileDialog sfd = new SaveFileDialog();
+
+                    sfd.Filter = "Vorbis files (*.ogg)|*.ogg;";
+                    sfd.RestoreDirectory = true;
+
+                    if (sfd.ShowDialog() == DialogResult.OK)
+                    {
+                        if ((stream = sfd.OpenFile()) != null)
+                        {
+                            stream.Write(vorbisBytes, 0, vorbisBytes.Length);
+                            stream.Close();
+                            MessageBox.Show("File exported successfully");
+                        }
+                    }
+                    break;
+            }
         }
 
         private bool CanOpenReplacerView(object p)

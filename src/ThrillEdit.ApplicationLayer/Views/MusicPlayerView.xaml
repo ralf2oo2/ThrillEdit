@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:ThrillEdit.ApplicationLayer.Views"
              xmlns:views="clr-namespace:ThrillEdit.ApplicationLayer.Views"
              xmlns:viewmodels="clr-namespace:ThrillEdit.ApplicationLayer.ViewModels"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:converters="clr-namespace:ThrillEdit.ApplicationLayer.Converters"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d" 
@@ -15,6 +16,9 @@
         <converters:TimeConverter x:Key="TimeConverter"/>
         <converters:BarProgressMultiConverter x:Key="BarProgressMultiConverter"/>
         <converters:SelectedVorbisBackgroundColorMultiConverter x:Key="SelectedVorbisBackgroundColorMultiConverter"/>
+        <converters:CommandParameterMultiConverter x:Key="CommandParameterMultiConverter"/>
+        <sys:Int32 x:Key="ContextMenuCommandIndex1">1</sys:Int32>
+        <sys:Int32 x:Key="ContextMenuCommandIndex2">2</sys:Int32>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -39,7 +43,22 @@
                             </Grid.ColumnDefinitions>
                             <Grid.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Header = "Replace" Command="{Binding Path=Parent.PlacementTarget.Tag, RelativeSource={RelativeSource Self}}" CommandParameter="{Binding}"/>
+                                    <MenuItem Header = "Replace" Command="{Binding Path=Parent.PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                                        <MenuItem.CommandParameter>
+                                            <MultiBinding Converter="{StaticResource CommandParameterMultiConverter}">
+                                                <Binding Path="."/>
+                                                <Binding Path="." Source="{StaticResource ContextMenuCommandIndex1}"/>
+                                            </MultiBinding>
+                                        </MenuItem.CommandParameter>
+                                    </MenuItem>
+                                    <MenuItem Header = "Export" Command="{Binding Path=Parent.PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                                        <MenuItem.CommandParameter>
+                                            <MultiBinding Converter="{StaticResource CommandParameterMultiConverter}">
+                                                <Binding Path="."/>
+                                                <Binding Path="." Source="{StaticResource ContextMenuCommandIndex2}"/>
+                                            </MultiBinding>
+                                        </MenuItem.CommandParameter>
+                                    </MenuItem>
                                 </ContextMenu>
                             </Grid.ContextMenu>
                             <Grid.Background>
