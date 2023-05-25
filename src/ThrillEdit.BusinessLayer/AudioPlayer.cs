@@ -195,7 +195,14 @@ namespace ThrillEdit.BusinessLayer
         {
             if (_vorbisWaveReader != null)
             {
-                _vorbisWaveReader.CurrentTime = TimeSpan.FromSeconds(value);
+                try
+                {
+                    _vorbisWaveReader.CurrentTime = TimeSpan.FromSeconds(value);
+                }
+                catch(Exception)
+                {
+
+                }
             }
         }
 
