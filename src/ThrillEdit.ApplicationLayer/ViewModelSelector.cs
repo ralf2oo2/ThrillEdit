@@ -12,17 +12,19 @@ namespace ThrillEdit.ApplicationLayer
     {
         private readonly VorbisEdit _vorbisEdit;
         private readonly ProgressBar _progressBar;
-        public ViewModelSelector(VorbisEdit vorbisEdit, ProgressBar progressBar)
+        private readonly ApplicationSettings _applicationSettings;
+        public ViewModelSelector(VorbisEdit vorbisEdit, ProgressBar progressBar, ApplicationSettings applicationSettings)
         {
             _vorbisEdit = vorbisEdit;
             _progressBar = progressBar;
+            _applicationSettings = applicationSettings;
         }
 
         public ViewModelBase GetViewModel(string filePath)
         {
             if(_vorbisEdit.CheckForVorbisData(filePath, 5242880))
             {
-                return new MusicPlayerViewModel(_vorbisEdit, filePath, _progressBar);
+                return new MusicPlayerViewModel(_vorbisEdit, filePath, _progressBar, _applicationSettings);
             }
             return new UnsupportedViewModel();
         }

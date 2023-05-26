@@ -14,8 +14,8 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
     public class MusicReplacerEditorViewModel : ViewModelBase
     {
 		private readonly VorbisEdit _vorbisEdit;
-		private VorbisData _selectedVorbisData;
-		private readonly Action _reloadMethod;
+        private readonly Action _reloadMethod;
+        private VorbisData _selectedVorbisData;
 
 		public VorbisData SelectedVorbisData
 		{
@@ -31,6 +31,15 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
 			set { _replacementVorbisData = value; OnPropertyChanged(); }
 		}
 
+		private VorbisData _originalVorbisData;
+
+		public VorbisData OriginalVorbisData
+		{
+			get { return _originalVorbisData; }
+			set { _originalVorbisData = value; }
+		}
+
+
 		private string _selectedPath;
 
 		public string SelectedPath
@@ -43,11 +52,12 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
 		public ICommand ReplaceSongCommand { get; set; }
         public ICommand OpenFileCommand { get; set; }
 
-        public MusicReplacerEditorViewModel(VorbisEdit vorbisEdit, VorbisData selectedVorbisData, Action reloadMethod)
+        public MusicReplacerEditorViewModel(VorbisEdit vorbisEdit, VorbisData selectedVorbisData, VorbisData originalVorbisData, Action reloadMethod)
 		{
 			_vorbisEdit = vorbisEdit;
 			_reloadMethod = reloadMethod;
 			SelectedVorbisData = selectedVorbisData;
+			OriginalVorbisData = originalVorbisData;
 			ReplaceSongCommand = new RelayCommand(ReplaceSong, CanReplaceSong);
 			OpenFileCommand = new RelayCommand(OpenFile, CanOpenFile);
 		}
@@ -84,8 +94,24 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
         {
 			if(ReplacementVorbisData != null)
 			{
-				return true;
-			}
+                /*if(OriginalVorbisData.Size != 0)
+				{
+					if(ReplacementVorbisData.Size <= OriginalVorbisData.Size)
+					{
+						return true;
+					}
+				}
+				else
+				{
+                    
+                }*/
+
+                if (ReplacementVorbisData.Size <= SelectedVorbisData.Size)
+
+                {
+                    return true;
+                }
+            }
 			return false;
         }
     }

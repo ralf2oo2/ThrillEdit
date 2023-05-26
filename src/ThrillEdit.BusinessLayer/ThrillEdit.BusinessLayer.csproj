@@ -8,6 +8,37 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Data\common.json" />
+    <None Remove="Data\minigame.json" />
+    <None Remove="Data\music.json" />
+    <None Remove="Data\auddata\owner\english.json" />
+    <None Remove="Data\auddata\parks\english.json" />
+    <None Remove="Data\auddata\tutorial\english.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Data\auddata\common.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\auddata\minigame.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\auddata\music.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\auddata\owner\english.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\auddata\parks\english.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\auddata\tutorial\english.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ByteSize" Version="2.1.1" />
     <PackageReference Include="NAudio" Version="2.1.0" />
     <PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
     <PackageReference Include="System.Drawing.Common" Version="7.0.0" />

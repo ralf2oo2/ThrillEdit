@@ -8,14 +8,14 @@ namespace ThrillEdit.BusinessLayer.Models
 {
 	public class VorbisData
     {
-        private long _startPos;
+        private long _startPos = 0;
 
         public long StartPos
         {
             get { return _startPos; }
             set { _startPos = value; }
         }
-        private long _endPos;
+        private long _endPos = 0;
 
         public long EndPos
         {

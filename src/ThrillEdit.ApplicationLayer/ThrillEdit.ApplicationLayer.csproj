@@ -7,6 +7,7 @@
     <UseWPF>true</UseWPF>
     <Platforms>AnyCPU;x86;x64</Platforms>
     <ApplicationIcon>thrilledit.ico</ApplicationIcon>
+    <AssemblyName>ThrillEdit</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -41,6 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="ByteSize" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
   </ItemGroup>

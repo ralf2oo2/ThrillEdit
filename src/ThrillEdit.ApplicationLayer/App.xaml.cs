@@ -47,7 +47,8 @@ namespace ThrillEdit.ApplicationLayer
                          (services) => new ViewModelSelector
                              (
                                  services.GetRequiredService<VorbisEdit>(),
-                                 services.GetRequiredService<ProgressBar>()
+                                 services.GetRequiredService<ProgressBar>(),
+                                 services.GetRequiredService<ApplicationSettings>()
                              )
                     );
                 })

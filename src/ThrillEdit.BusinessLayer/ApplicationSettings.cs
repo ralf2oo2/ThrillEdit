@@ -28,5 +28,22 @@ namespace ThrillEdit.BusinessLayer
             await using FileStream createStream = File.Create("settings.json");
             await JsonSerializer.SerializeAsync(createStream, settings);
         }
+        public VorbisData GetOriginalVorbisData(string path, int index)
+        {
+            Settings settings = GetApplicationSettings();
+
+            string relativePath = path.Replace(settings.GameDirectory, "");
+            relativePath = relativePath.Replace(relativePath.Split(".").Last(), "");
+            relativePath = $"Data{relativePath}json";
+            if (!File.Exists(relativePath))
+            {
+                return new VorbisData();
+            }
+            string json = File.ReadAllText(relativePath);
+            List<VorbisData> vorbisData = JsonSerializer.Deserialize<List<VorbisData>>(json);
+            return vorbisData[index];
+        }
+
+
     }
 }

@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using ThrillEdit.BusinessLayer.Models;
 
@@ -183,6 +184,7 @@ namespace ThrillEdit.BusinessLayer
             return vorbisData;
         }
 
+
         public async Task<ObservableCollection<VorbisData>> ExtractVorbisDataAsync(string fileName, int bufferSize, IProgress<(long current, long total)> progress)
         {
             ObservableCollection<VorbisData> vorbisData = new ObservableCollection<VorbisData>();
@@ -270,6 +272,7 @@ namespace ThrillEdit.BusinessLayer
                     progress.Report((lastOffset, fs.Length));
                 }
             }
+
             foreach (VorbisData vorbis in vorbisData)
             {
                 MemoryStream s = new MemoryStream(GetVorbisBytes(vorbis));
@@ -403,6 +406,65 @@ namespace ThrillEdit.BusinessLayer
 
                         byte[] newVorbis = GetVorbisBytes(currentDataReplacement.newData);
                         targetFs.Write(newVorbis, 0, newVorbis.Length);
+                        if (dataReplacement.newData.Size < dataReplacement.OriginalData.Size)
+                        {
+                            targetFs.Seek(dataReplacement.OriginalData.EndPos + 1, SeekOrigin.Begin);
+                        }
+
+                        originFs.Seek(currentDataReplacement.OriginalData.EndPos + 1, SeekOrigin.Begin);
+
+                        if (dataReplacements.Count == 1)
+                        {
+                            byte[] endBytes = new byte[originFs.Length - currentDataReplacement.OriginalData.EndPos];
+                            originFs.Read(endBytes, 0, endBytes.Length);
+
+                            targetFs.Write(endBytes, 0, endBytes.Length);
+                        }
+                        else
+                        {
+                            DataReplacement nextDataReplacement = dataReplacements[1];
+
+                            byte[] middleBytes = new byte[nextDataReplacement.OriginalData.StartPos - currentDataReplacement.OriginalData.EndPos];
+
+                            originFs.Read(middleBytes, 0, middleBytes.Length);
+
+                            targetFs.Write(middleBytes, 0, middleBytes.Length);
+                        }
+                        dataReplacements.Remove(currentDataReplacement);
+                    }
+                }
+
+            }
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+            File.Move(tempPath, filePath);
+        }
+
+        /*public void ReplaceVorbisDataOld(List<DataReplacement> dataReplacements, string filePath)
+        {
+            dataReplacements = dataReplacements.OrderBy(x => x.OriginalData.StartPos).ToList();
+            Directory.CreateDirectory("Temp");
+            string tempPath = $"Temp//{Path.GetFileName(filePath)}";
+
+            using (var originFs = new FileStream(filePath, FileMode.Open))
+            {
+                using (var targetFs = new FileStream(tempPath, FileMode.Create, FileAccess.Write))
+                {
+                    DataReplacement dataReplacement = dataReplacements.First();
+                    originFs.Seek(0, SeekOrigin.Begin);
+                    byte[] startBytes = new byte[dataReplacement.OriginalData.StartPos];
+                    originFs.Read(startBytes, 0, startBytes.Length);
+
+                    targetFs.Write(startBytes, 0, startBytes.Length);
+
+                    while (dataReplacements.Count > 0)
+                    {
+                        DataReplacement currentDataReplacement = dataReplacements.First();
+
+                        byte[] newVorbis = GetVorbisBytes(currentDataReplacement.newData);
+                        targetFs.Write(newVorbis, 0, newVorbis.Length);
 
                         originFs.Seek(currentDataReplacement.OriginalData.EndPos + 1, SeekOrigin.Begin);
 
@@ -434,7 +496,7 @@ namespace ThrillEdit.BusinessLayer
                 File.Delete(filePath);
             }
             File.Move(tempPath, filePath);
-        }
+        }*/
 
         public byte[] GetVorbisBytes(VorbisData vorbisData)
         {

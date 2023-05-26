@@ -9,24 +9,57 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <converters:TimeConverter x:Key="TimeConverter"/>
+        <converters:FileSizeForegroudColorMultiConverter x:Key="FileSizeForegroudColorMultiConverter"/>
+        <converters:MegaByteConverter x:Key="MegaByteConverter"/>
+        <converters:OriginalSongDataVisibilityConverter x:Key="OriginalSongDataVisibilityConverter"/>
     </UserControl.Resources>
     <Grid>
+        <StackPanel HorizontalAlignment="Right" Orientation="Vertical" Margin="0,130,10,0" Visibility="Hidden">
+            <TextBlock Text="Original Song Size" Foreground="White"/>
+            <TextBlock Text="{Binding OriginalVorbisData.Size, Mode=OneWay, Converter={StaticResource MegaByteConverter}}" Foreground="White" ToolTip="{Binding OriginalVorbisData.Size}"/>
+        </StackPanel>
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
             <TextBlock Text="Selected Song" Foreground="White" FontSize="20" FontWeight="Bold" Margin="0,0,0,10"/>
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,40">
-                <TextBlock Text="{Binding SelectedVorbisData.SongName}" Foreground="White" Margin="0,0,30,0"/>
-                <TextBlock Text="{Binding SelectedVorbisData.Duration, Mode=OneWay, Converter={StaticResource TimeConverter}}" Foreground="White" Margin="30,0,0,0"/>
-            </StackPanel>
-
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding SelectedVorbisData.SongName}" Foreground="White"/>
+                <TextBlock Text="{Binding SelectedVorbisData.Duration, Mode=OneWay, Converter={StaticResource TimeConverter}}" Foreground="White" Grid.Column="1" HorizontalAlignment="Right"/>
+                <TextBlock Text="{Binding SelectedVorbisData.Rate}" Foreground="White" Grid.Row="1"/>
+                <TextBlock Text="{Binding SelectedVorbisData.Size, Mode=OneWay, Converter={StaticResource MegaByteConverter}}" Foreground="White" ToolTip="{Binding SelectedVorbisData.Size}" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right"/>
+            </Grid>
             <TextBlock Text="Replacement Song" Foreground="White" FontSize="20" FontWeight="Bold" Margin="0,0,0,10"/>
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                 <TextBox Text="{Binding SelectedPath, Mode=TwoWay}" Width="190" IsReadOnly="True"/>
                 <Button Content="..." Command="{Binding OpenFileCommand}"/>
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="{Binding ReplacementVorbisData.SongName}" Foreground="White" Margin="0,0,30,0"/>
-                <TextBlock Text="{Binding ReplacementVorbisData.Duration, Mode=OneWay, Converter={StaticResource TimeConverter}}" Foreground="White" Margin="30,0,0,0"/>
-            </StackPanel>
+            <Grid Margin="0,0,0,10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding ReplacementVorbisData.SongName}" Foreground="White"/>
+                <TextBlock Text="{Binding ReplacementVorbisData.Duration, Mode=OneWay, Converter={StaticResource TimeConverter}}" Foreground="White" Grid.Column="1" HorizontalAlignment="Right"/>
+                <TextBlock Text="{Binding ReplacementVorbisData.Rate}" Foreground="White" Grid.Row="1"/>
+                <TextBlock Text="{Binding ReplacementVorbisData.Size, Mode=OneWay, Converter={StaticResource MegaByteConverter}}" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right">
+                    <TextBlock.Foreground>
+                        <MultiBinding Converter="{StaticResource FileSizeForegroudColorMultiConverter}">
+                            <Binding Path="ReplacementVorbisData"/>
+                            <Binding Path="SelectedVorbisData"/>
+                        </MultiBinding>
+                    </TextBlock.Foreground>
+                </TextBlock>
+            </Grid>
             <Button Content="Replace" Padding="10,5,10,5" Command="{Binding ReplaceSongCommand}"/>
         </StackPanel>
     </Grid>
