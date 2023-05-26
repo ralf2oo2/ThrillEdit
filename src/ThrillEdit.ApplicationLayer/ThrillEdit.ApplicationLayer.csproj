@@ -8,7 +8,15 @@
     <Platforms>AnyCPU;x86;x64</Platforms>
     <ApplicationIcon>thrilledit.ico</ApplicationIcon>
     <AssemblyName>ThrillEdit</AssemblyName>
+	<Version>0.1.0</Version>
+	<FileVersion>0.1.0</FileVersion>
+	 <PublishSingleFile>true</PublishSingleFile>
+	 <SelfContained>true</SelfContained>
   </PropertyGroup>
+
+    <PropertyGroup>
+	    <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
+    </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Images\pause.png" />
@@ -20,24 +28,24 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Images\pause.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Images\play.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Images\skip_next.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Images\skip_previous.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Images\stop.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Images\unsupported.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Resource Include="Images\pause.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\play.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\skip_next.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\skip_previous.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\stop.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\unsupported.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Content Include="thrilledit.ico" />
   </ItemGroup>
 

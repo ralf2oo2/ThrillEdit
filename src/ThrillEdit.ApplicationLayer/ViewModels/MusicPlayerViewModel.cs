@@ -213,7 +213,7 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
             _timer.Start();
 
             CurrentVolume = 1;
-            PlayPauseImageSource = "../Images/play.png";
+            PlayPauseImageSource = "pack://application:,,,/Images/play.png";
         }
 
         private async Task LoadVorbisData(string filePath)
@@ -431,7 +431,7 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
         private void _audioPlayer_PlaybackStopped()
         {
             _playbackState = PlaybackState.Stopped;
-            PlayPauseImageSource = "../Images/play.png";
+            PlayPauseImageSource = "pack://application:,,,/Images/play.png";
             CommandManager.InvalidateRequerySuggested();
             CurrentTrackPosition = 0;
 
@@ -446,7 +446,7 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
         private void _audioPlayer_PlaybackResumed()
         {
             _playbackState = PlaybackState.Playing;
-            PlayPauseImageSource = "../Images/pause.png";
+            PlayPauseImageSource = "pack://application:,,,/Images/pause.png";
         }
         private void UpdateProgressBar(object sender, EventArgs e)
         {
@@ -459,7 +459,7 @@ namespace ThrillEdit.ApplicationLayer.ViewModels
         private void _audioPlayer_PlaybackPaused()
         {
             _playbackState = PlaybackState.Paused;
-            PlayPauseImageSource = "../Images/play.png";
+            PlayPauseImageSource = "pack://application:,,,/Images/play.png";
         }
     }
 }

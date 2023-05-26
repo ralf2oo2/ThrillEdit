@@ -9,7 +9,11 @@
     <Grid>
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Bottom" Orientation="Vertical">
             <TextBlock Foreground="White" Text="Editing this file is currently not supported by ThrillEdit" FontWeight="Bold" TextWrapping="Wrap"/>
-            <Image Source="../Images/unsupported.png" Height="200" Width="100" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,20,0,0"/>
+            <Image Height="200" Width="100" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,20,0,0">
+                <Image.Source>
+                    <BitmapImage UriSource="pack://application:,,,/Images/unsupported.png" />
+                </Image.Source>
+            </Image>
         </StackPanel>
     </Grid>
 </UserControl>
